@@ -27,22 +27,6 @@
                 </div>
             </div>
         <div class="col-sm-offset-2 col-sm-8">
-            @if(count($tasks) === 0)
-                <h2>Current tasks</h2>
-                <div class="panel-body">
-                    <table class="table">
-                        <thead>
-                            <h4 class="pull-left">Task list</h4>
-                            <h4 class="pull-right">No tasks in list</h4>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>No tasks found. Try adding one.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            @endif
             @if (count($tasks) > 0)
                     <form action="{{ url('task/all') }}" method="POST">
                         {{ csrf_field() }}
@@ -52,11 +36,11 @@
                     <div class="panel-body scrollbox" style="max-height: 100vh; overflow: auto">
                 <table class="table" style="position: fixed">
                     <h4 class="pull-left">Task list</h4>
-                    <h4 class="pull-right">{{ count($tasks) }} task(s) in list</h4>
                 </table>
                         <table class="table table-striped">
                             <tbody>
                             @foreach ($tasks as $task)
+                                @if(!$task->done)
                                 <tr>
                                     <td class="table-text"><div>{{ $task->name }}</div></td>
                                     <td class="table-text"><div class="pull-right">{{ $task->created_at }}</div></td>
@@ -66,14 +50,54 @@
                                             {{ method_field('DELETE') }}
                                             <button type="submit" class="btn btn-danger pull-right">Delete</button>
                                         </form>
+                                        <form action="{{ url('task/' . $task->id) }}" method="post">
+                                            <button type="submit" class="btn btn-success">Done</button>
+                                            {{ method_field('PATCH') }}
+                                            {{ csrf_field() }}
+                                        </form>
                                     </td>
                                 </tr>
+                                @endif
                             @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
             @endif
+        @if ($tasks->count())
+            <div class="col-sm-offset-2 col-sm-8">
+            <h2>Done</h2>
+            <div class="panel-body">
+                <table class="table">
+                    <h4 class="pull-left">Task list</h4>
+                </table>
+                <table class="table table-striped">
+                    <tbody>
+                    @foreach ($tasks as $task)
+                        @if($task->done)
+                        <tr>
+                            <td class="table-text"><div>{{ $task->name }}</div></td>
+                            <td class="table-text"><div class="pull-right">{{ $task->updated_at }}</div></td>
+                            <td>
+                                <form action="{{ url('task/' . $task->id) }}" method="post" class="pull-right">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    {{ method_field('DELETE') }}
+                                    {{ csrf_field() }}
+                                </form>
+                                <form action="{{ url('task/undo/' . $task->id) }}" method="post">
+                                    <button type="submit" class="btn btn-success">Undo</button>
+                                    {{ method_field('PATCH') }}
+                                    {{ csrf_field() }}
+                                </form>
+                            </td>
+                        </tr>
+                        @endif
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        @endif
         </div>
     </div>
 @endsection
